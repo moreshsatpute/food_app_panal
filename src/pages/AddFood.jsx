@@ -57,7 +57,7 @@ const AddFood = () => {
     if (image) {
   console.log("Uploading image to storage...");
   imageUrl = await uploadImage(image);
-  console.log("ImageUpload url", imageUrl); // <-- Add this line
+  console.log("ImageUpload url", imageUrl); 
   if (!imageUrl) {
     alert('Image upload failed. Please try again.');
     return;

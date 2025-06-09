@@ -8,28 +8,44 @@ import {
   doc
 } from 'firebase/firestore';
 
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 const foodCollectionRef = collection(db, 'foods');
 
+// src/services/foodService.js
+
 export const uploadImage = async (file) => {
+  const cloudName = "dt3bkyanp";
+  const uploadPreset = "MyFoodApp";
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
+
   try {
-    console.log('📤 Uploading image:', file.name);
+    console.log("📤 Uploading image to Cloudinary...");
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: "POST",
+      body: formData,
+    });
 
-    const storageRef = ref(storage, `foods/${file.name}`);
-    const snapshot = await uploadBytes(storageRef, file);
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ Upload failed:", errorData);
+      throw new Error("Upload failed");
+    }
 
-    console.log('✅ Upload successful:', snapshot.metadata.fullPath);
-
-    const url = await getDownloadURL(storageRef);
-    console.log('🔗 Download URL:', url);
-
-    return url;
+    const data = await response.json();
+    console.log("✅ Upload success. Image URL:", data.secure_url);
+    return data.secure_url;
   } catch (error) {
-    console.error('❌ Error uploading image:', error);
+    console.error("❌ Cloudinary upload failed:", error);
     throw error;
   }
 };
+
+
+
 
 
 export const addFood = async (data) => {
